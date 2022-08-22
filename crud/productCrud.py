@@ -19,7 +19,7 @@ def get_products(
 ):
 
     if category_name:
-        category_id = db.query(model.Category).filter(model.Category.name == category_name).first().id
+        category_id = db.query(model.Category).filter(model.Category.name.like('%' + category_name + '%')).first().id
 
     categoryProduct = db.query(model.Product) \
         .join(model.AssociationTable) \
