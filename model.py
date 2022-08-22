@@ -18,8 +18,8 @@ class Product(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     description = Column(String)
-    cost = Column(String)
-    published = Column(String)
+    cost = Column(Integer)
+    published = Column(Boolean)
     deleted = Column(Boolean)
 
     category = relationship(
@@ -31,7 +31,7 @@ class Category(Base):
     __tablename__ = "category"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
+    name = Column(String, unique=True)
 
     products = relationship(
         "Product", secondary="association", back_populates="category"

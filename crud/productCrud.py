@@ -5,8 +5,43 @@ import model
 from schemas import productsScheme
 
 
-def get_products(db: Session, skip: int = 0, limit: int = 10):
-    return db.query(model.Product).offset(skip).limit(limit).all()
+def get_products(
+        db: Session,
+        offset: int,
+        limit: int,
+        search_string: str,
+        category_id: int,
+        category_name: str,
+        min_price: int,
+        max_price: int,
+        public: bool,
+        deleted: bool
+):
+
+    if category_name:
+        category_id = db.query(model.Category).filter(model.Category.name == category_name).first().id
+
+    categoryProduct = db.query(model.Product) \
+        .join(model.AssociationTable) \
+        .filter(model.AssociationTable.category_id == category_id)
+
+    if categoryProduct.all():
+        products = categoryProduct
+    else:
+        products = db.query(model.Product)
+
+    products \
+        .filter(model.Product.published == public) \
+        .filter(model.Product.deleted == deleted)
+
+    if search_string is not None:
+        products = products.filter(model.Product.name.like('%' + search_string + '%'))
+    if min_price is not None:
+        products = products.filter(model.Product.cost >= min_price)
+    if max_price is not None:
+        products = products.filter(model.Product.cost <= max_price)
+
+    return products.offset(offset).limit(limit).all()
 
 
 def create_product(db: Session, product: productsScheme.ProductCreate):

@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter, HTTPException
+from fastapi import Depends, APIRouter, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from crud import productCrud
@@ -31,14 +31,26 @@ def remove_product(product_id: int, db: Session = Depends(get_db)):
 
 @router.get("/list")
 def read_products(
-        skip: int = 0,
-        limit: int = 10,
-        q: str = '',
+        offset: int = Query(0, alias="pagination[offset]"),
+        limit: int = Query(10, alias="pagination[limit]"),
+        q: str = Query(None, alias="filter[q]"),
+        category_id: int = Query(None, alias="filter[category_id]"),
+        category_name: str = Query(None, alias="filter[category_name]"),
+        min_price: int = Query(None, alias="filter[min_price]"),
+        max_price: int = Query(None, alias="filter[max_price]"),
+        public: bool = Query(True, alias="filter[public]"),
+        deleted: bool = Query(False, alias="filter[deleted]"),
         db: Session = Depends(get_db)
 ):
     return productCrud.get_products(
         db,
-        skip=skip,
+        offset=offset,
         limit=limit,
-        q=q
+        search_string=q,
+        category_id=category_id,
+        category_name=category_name,
+        min_price=min_price,
+        max_price=max_price,
+        public=public,
+        deleted=deleted
     )
