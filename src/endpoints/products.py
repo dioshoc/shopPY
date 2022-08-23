@@ -1,35 +1,35 @@
 from fastapi import Depends, APIRouter, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from crud import productCrud
-from endpoints.depends import get_db
-from schemas import productsScheme
+from src.crud import product_crud
+from src.endpoints.depends import get_db
+from src.schemas.products_scheme import ProductCreate, ProductUpdate
 
-router = APIRouter()
+router = APIRouter(prefix="/product", tags=["product"])
 
 
-@router.post("/")
-def create_product(product: productsScheme.ProductCreate, db: Session = Depends(get_db)):
+@router.post("")
+def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     categoryLength = len(product.category)
     if 2 > categoryLength or categoryLength > 10:
         raise HTTPException(status_code=403, detail="Wrong number of categories")
-    return productCrud.create_product(db, product=product)
+    return product_crud.create_product(db, product=product)
+
+
+@router.delete("/{product_id}")
+def remove_product(product_id: int, db: Session = Depends(get_db)):
+    return product_crud.remove_product(db, product_id=product_id)
 
 
 @router.post("/{product_id}/update")
-def update_product(product_id: int, product: productsScheme.ProductUpdate, db: Session = Depends(get_db)):
-    categoryLength = len(product.category)
-    if 2 > categoryLength or categoryLength > 10:
+def update_product(product_id: int, product: ProductUpdate, db: Session = Depends(get_db)):
+    category_length = len(product.category)
+    if not 2 < category_length < 10:
         raise HTTPException(status_code=403, detail="Wrong number of categories")
-    return productCrud.update_product(db, product=product, product_id=product_id)
+    return product_crud.update_product(db, product=product, product_id=product_id)
 
 
-@router.delete("/{product_id}/remove")
-def remove_product(product_id: int, db: Session = Depends(get_db)):
-    return productCrud.remove_product(db, product_id=product_id)
-
-
-@router.get("/list")
+@router.get("")
 def read_products(
         offset: int = Query(0, alias="pagination[offset]"),
         limit: int = Query(10, alias="pagination[limit]"),
@@ -42,7 +42,7 @@ def read_products(
         deleted: bool = Query(False, alias="filter[deleted]"),
         db: Session = Depends(get_db)
 ):
-    return productCrud.get_products(
+    return product_crud.get_products(
         db,
         offset=offset,
         limit=limit,

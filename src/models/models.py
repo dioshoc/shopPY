@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 
-from db.database import Base
+from src.db.database import Base
 
 
 class AssociationTable(Base):
